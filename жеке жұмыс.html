@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Асқорыту жүйесі: Мифтер мен Шындық</title>
+    <style>
+        :root {
+            --bg-color: #eef5fc;
+            --card-bg: #ffffff;
+            --primary-blue: #3a86ff;
+            --neon-blue: #00f5ff;
+            --text-dark: #2b3a4a;
+            --text-muted: #6c7a89;
+            --shadow-neon: 0 0 15px rgba(0, 245, 255, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            line-height: 1.6;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: var(--primary-blue);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(58, 134, 255, 0.2);
+            margin-bottom: 15px;
+        }
+
+        /* Тапсырма нұсқаулығы */
+        .instruction-box {
+            background: linear-gradient(135deg, #ffffff, #e3f2fd);
+            border-left: 5px solid var(--primary-blue);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .instruction-box p {
+            font-weight: 600;
+            color: #1e3a5f;
+            font-size: 1.1rem;
+        }
+
+        .instruction-box span {
+            color: var(--primary-blue);
+            text-decoration: underline;
+        }
+
+        /* Мифтер карточкалары */
+        .myths-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .myth-card {
+            background-color: var(--card-bg);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.03);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .myth-card:hover {
+            border-color: var(--neon-blue);
+            box-shadow: var(--shadow-neon), 0 10px 20px rgba(0,0,0,0.05);
+            transform: translateY(-3px);
+        }
+
+        .myth-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .myth-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .myth-badge {
+            background-color: #ffeef0;
+            color: #e63946;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        .myth-text {
+            margin-top: 10px;
+            font-style: italic;
+            color: var(--text-dark);
+            font-size: 1.1rem;
+        }
+
+        /* Жасырын жауап блогы */
+        .truth-toggle {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease, opacity 0.5s ease;
+            margin-top: 0;
+            padding-top: 0;
+            border-top: 1px dashed transparent;
+        }
+
+        /* Активті күйі */
+        .myth-card.active {
+            border-color: var(--primary-blue);
+            background-color: #f8fbff;
+        }
+
+        .myth-card.active .truth-toggle {
+            max-height: 200px; /* Жауап сыйымдылығы үшін */
+            opacity: 1;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed #ced6e0;
+        }
+
+        .truth-content {
+            background-color: #e8f5e9;
+            border-left: 4px solid #2e7d32;
+            padding: 12px 15px;
+            border-radius: 4px;
+            color: #1b5e20;
+            font-weight: 500;
+        }
+
+        .truth-content strong {
+            color: #2e7d32;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .hint {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        .back-btn { 
+            position: fixed; top: 20px; left: 20px; 
+            background-color: rgba(203, 169, 116, 0.2); color: #cba974; 
+            border: 1px solid #cba974; padding: 10px 15px; 
+            border-radius: 8px; cursor: pointer; 
+            z-index: 100; font-weight: bold; 
+            transition: 0.3s;
+        }
+        .back-btn:hover { background-color: #cba974; color: #000; }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="history.back()">⬅ Артқа қайту</button>
+
+<div class="container">
+    <header>
+        <h1>Асқорыту жүйесі</h1>
+        <p style="color: var(--text-muted); font-weight: 500;">Мифтер мен Шындықтар интерактивті платформасы</p>
+    </header>
+
+    <div class="instruction-box">
+        <p>📝 Көңіл аударыңыз: Тапсырманы <span>толық жұмыс парағында</span> орындау қажет!</p>
+    </div>
+
+    <div class="myths-list">
+
+        <div class="myth-card" onclick="toggleTruth(this)">
+            <div class="myth-header">
+                <span class="myth-badge">1-Миф</span>
+            </div>
+            <p class="myth-text">“Тамақты тез жесең, ол бәрібір жақсы қорытылады.”</p>
+            <div class="truth-toggle">
+                <div class="truth-content">
+                    <strong>👉 Шын мәнінде:</strong> Тамақты жақсы шайнау асқорытуды жеңілдетеді, ал тез жеу асқазанға ауырлық түсіреді.
+                </div>
+            </div>
+        </div>
+
+        <div class="myth-card" onclick="toggleTruth(this)">
+            <div class="myth-header">
+                <span class="myth-badge">2-Миф</span>
+            </div>
+            <p class="myth-text">“Су асқазан сөлін әлсіретіп, ас қорытуды бұзады.”</p>
+            <div class="truth-toggle">
+                <div class="truth-content">
+                    <strong>👉 Шын мәнінде:</strong> Аз мөлшерде су керісінше ас қорытуға көмектеседі.
+                </div>
+            </div>
+        </div>
+
+        <div class="myth-card" onclick="toggleTruth(this)">
+            <div class="myth-header">
+                <span class="myth-badge">3-Миф</span>
+            </div>
+            <p class="myth-text">“Асқазан бәрін өзі қорытады, ауыз қуысының рөлі маңызды емес.”</p>
+            <div class="truth-toggle">
+                <div class="truth-content">
+                    <strong>👉 Шын мәнінде:</strong> Ас қорыту ауызда басталады (сілекей көмірсуларды ыдыратады).
+                </div>
+            </div>
+        </div>
+
+        <div class="myth-card" onclick="toggleTruth(this)">
+            <div class="myth-header">
+                <span class="myth-badge">4-Миф</span>
+            </div>
+            <p class="myth-text">“Майлы тағамды көп жесең, ол бірден асқазанға зиян.”</p>
+            <div class="truth-toggle">
+                <div class="truth-content">
+                    <strong>👉 Шын мәнінде:</strong> Майлы тағамды шамадан тыс тұтыну ғана ас қорытуға қиындық туғызады.
+                </div>
+            </div>
+        </div>
+
+        <div class="myth-card" onclick="toggleTruth(this)">
+            <div class="myth-header">
+                <span class="myth-badge">5-Миф</span>
+            </div>
+            <p class="myth-text">“Ас ішкеннен кейін жату ас қорытуға көмектеседі.”</p>
+            <div class="truth-toggle">
+                <div class="truth-content">
+                    <strong>👉 Шын мәнінде:</strong> Бірден жату асқазан қыжылын және кері рефлюксті күшейтуі мүмкін.
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <p class="hint">💡 Шындықты білу үшін кез келген миф карточкасының үстінен басыңыз.</p>
+</div>
+
+<script>
+    function toggleTruth(card) {
+        // Басқа ашылып тұрған карточкаларды жабу (аккордеон эффектісі)
+        const activeCards = document.querySelectorAll('.myth-card.active');
+        activeCards.forEach(c => {
+            if (c !== card) {
+                c.classList.remove('active');
+            }
+        });
+
+        // Таңдалған карточканың күйін ауыстыру
+        card.classList.toggle('active');
+    }
+</script>
+
+</body>
+</html>

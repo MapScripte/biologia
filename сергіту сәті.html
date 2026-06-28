@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Асқорыту лабиринті ⭐⭐⭐⭐⭐</title>
+    <style>
+        :root {
+            --bg-color: #f0f8ff; /* Ашық көгілдір (Alice Blue) */
+            --primary-neon: #00f3ff; /* Жарық неон көгілдір */
+            --success-neon: #39ff14; /* Неон жасыл */
+            --danger-neon: #ff073a; /* Неон қызыл */
+            --text-color: #1a2a3a;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #0077b6;
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+            margin-bottom: 10px;
+        }
+
+        .description {
+            font-size: 1.1rem;
+            color: #555;
+        }
+
+        /* Ойын алаңы */
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 119, 182, 0.15);
+            border: 2px solid rgba(0, 243, 255, 0.2);
+        }
+
+        /* Тағамдар аймағы */
+        .source-zone {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            padding: 20px;
+            background: rgba(0, 243, 255, 0.05);
+            border-radius: 15px;
+            border: 2px dashed var(--primary-neon);
+            min-height: 80px;
+            align-items: center;
+        }
+
+        .food-item {
+            background: white;
+            border: 2px solid #0077b6;
+            padding: 12px 24px;
+            border-radius: 50px;
+            cursor: grab;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            user-select: none;
+            touch-action: none; /* Мобильді құрылғылар үшін */
+        }
+
+        .food-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 15px var(--primary-neon);
+            border-color: var(--primary-neon);
+        }
+
+        .food-item.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+
+        /* Лабиринт / Ұяшықтар аймағы */
+        .maze-zone {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+            position: relative;
+        }
+
+        .slot-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .target-slot {
+            width: 80%;
+            max-width: 400px;
+            height: 60px;
+            background: #e8f4fd;
+            border: 3px dashed #b0d4de;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: #888;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .target-slot.drag-over {
+            background: rgba(0, 243, 255, 0.1);
+            border-color: var(--primary-neon);
+            box-shadow: 0 0 15px var(--primary-neon);
+        }
+
+        /* Дұрыс/Бұрыс күйлері */
+        .target-slot.correct {
+            background: rgba(57, 255, 20, 0.1);
+            border-color: var(--success-neon);
+            border-style: solid;
+            box-shadow: 0 0 15px var(--success-neon);
+            color: #1e7e00;
+        }
+
+        .target-slot.wrong {
+            background: rgba(255, 7, 58, 0.1);
+            border-color: var(--danger-neon);
+            border-style: solid;
+            box-shadow: 0 0 15px var(--danger-neon);
+            color: #b30024;
+            animation: shake 0.3s ease;
+        }
+
+        /* Көрсеткіш жебелер */
+        .arrow {
+            font-size: 1.5rem;
+            color: #0077b6;
+            margin: 5px 0;
+            text-shadow: 0 0 5px var(--primary-neon);
+        }
+
+        /* Хабарлама терезесі */
+        .feedback-message {
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            min-height: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-reset {
+            margin-top: 20px;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #0077b6, var(--primary-neon));
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 243, 255, 0.4);
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        .btn-reset:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px var(--primary-neon);
+        }
+
+        /* Сүйреу кезіндегі анимация */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        .back-btn {
+            position: fixed; top: 20px; left: 20px;
+            background-color: #d4af37; color: #1a252f;
+            border: none; padding: 12px 24px;
+            font-weight: bold; border-radius: 30px;
+            cursor: pointer; z-index: 150;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="history.back()">⬅ АРТҚА ҚАЙТУ</button>
+
+
+    <header>
+        <h1>🍔 Асқорыту лабиринті 🌟</h1>
+        <p class="description">Тағамды асқорыту мүшелерінің дұрыс ретімен орналастырып, жолды аш!</p>
+    </header>
+
+    <div class="game-container">
+        <!-- Хабарлама тақтасы -->
+        <div class="feedback-message" id="feedback">Ойынды бастау үшін тағамдарды төменге сүйреңіз 👇</div>
+
+        <!-- Тағамдар (сүйрелетін элементтер) -->
+        <div class="source-zone" id="source-zone">
+            <!-- Элементтер JS арқылы араласып шығады -->
+        </div>
+
+        <!-- Лабиринт ұяшықтары -->
+        <div class="maze-zone">
+            <div class="slot-wrapper">
+                <div class="target-slot" data-order="1" data-name="Ауыз">1-қадам: ?</div>
+            </div>
+            <div class="arrow">⬇️</div>
+            <div class="slot-wrapper">
+                <div class="target-slot" data-order="2" data-name="Өңеш">2-қадам: ?</div>
+            </div>
+            <div class="arrow">⬇️</div>
+            <div class="slot-wrapper">
+                <div class="target-slot" data-order="3" data-name="Асқазан">3-қадам: ?</div>
+            </div>
+            <div class="arrow">⬇️</div>
+            <div class="slot-wrapper">
+                <div class="target-slot" data-order="4" data-name="Аш ішек">4-қадам: ?</div>
+            </div>
+            <div class="arrow">⬇️</div>
+            <div class="slot-wrapper">
+                <div class="target-slot" data-order="5" data-name="Тоқ ішек">5-қадам: ?</div>
+            </div>
+        </div>
+
+        <button class="btn-reset" id="reset-btn" onclick="initGame()">Қайта бастау 🔄</button>
+    </div>
+
+    <script>
+        // Дұрыс реттілік деректері
+        const correctOrder = [
+            { id: "1", name: "Ауыз 👄" },
+            { id: "2", name: "Өңеш 🥖" },
+            { id: "3", name: "Асқазан 🍅" },
+            { id: "4", name: "Аш ішек 🌀" },
+            { id: "5", name: "Тоқ ішек 🪱" }
+        ];
+
+        const sourceZone = document.getElementById('source-zone');
+        const feedback = document.getElementById('feedback');
+        const resetBtn = document.getElementById('reset-btn');
+        const slots = document.querySelectorAll('.target-slot');
+
+        let draggedItem = null;
+
+        // Ойынды іске қосу және элементтерді араластыру
+        function initGame() {
+            sourceZone.innerHTML = '';
+            feedback.textContent = "Ойынды бастау үшін тағамдарды төменге сүйреңіз 👇";
+            feedback.style.color = 'var(--text-color)';
+            resetBtn.style.display = 'none';
+
+            // Ұяшықтарды тазалау
+            slots.forEach(slot => {
+                const order = slot.getAttribute('data-order');
+                slot.textContent = `${order}-қадам: ?`;
+                slot.className = 'target-slot';
+            });
+
+            // Элементтерді кездейсоқ араластыру (Shuffle)
+            const shuffled = [...correctOrder].sort(() => Math.random() - 0.5);
+
+            shuffled.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'food-item';
+                div.draggable = true;
+                div.textContent = item.name;
+                div.setAttribute('data-id', item.id);
+
+                // Drag & Drop оқиғалары (Компьютер үшін)
+                div.addEventListener('dragstart', dragStart);
+                div.addEventListener('dragend', dragEnd);
+
+                // Touch оқиғалары (Мобильді телефондар үшін)
+                div.addEventListener('touchstart', handleTouchStart, { passive: false });
+                div.addEventListener('touchmove', handleTouchMove, { passive: false });
+                div.addEventListener('touchend', handleTouchEnd);
+
+                sourceZone.appendChild(div);
+            });
+        }
+
+        // Drag & Drop функциялары
+        function dragStart() {
+            draggedItem = this;
+            this.classList.add('dragging');
+        }
+
+        function dragEnd() {
+            this.classList.remove('dragging');
+            draggedItem = null;
+        }
+
+        // Ұяшықтардың оқиғаларын баптау
+        slots.forEach(slot => {
+            slot.addEventListener('dragover', e => e.preventDefault());
+            slot.addEventListener('dragenter', function() { this.classList.add('drag-over'); });
+            slot.addEventListener('dragleave', function() { this.classList.remove('drag-over'); });
+            slot.addEventListener('drop', function() {
+                this.classList.remove('drag-over');
+                checkDrop(draggedItem, this);
+            });
+        });
+
+        // Тексеру логикасы (Ең негізгі механика)
+        function checkDrop(item, slot) {
+            if (!item) return;
+
+            const itemId = item.getAttribute('data-id');
+            const slotOrder = slot.getAttribute('data-order');
+
+            if (itemId === slotOrder) {
+                // ДҰРЫС ҚОЙСА
+                slot.textContent = "✔️ " + item.textContent;
+                slot.className = 'target-slot correct';
+                item.remove(); // Тақтадан өшіру
+                feedback.textContent = "жол ашылды ✔️ Керемет!";
+                feedback.style.color = '#1e7e00';
+                checkWin();
+            } else {
+                // ҚАТЕ ҚОЙСА
+                slot.className = 'target-slot wrong';
+                feedback.textContent = "ас тоқтап қалды 😄 Қайта байқап көр!";
+                feedback.style.color = '#b30024';
+                
+                // Түсін 1 секундтан кейін қалпына келтіру
+                setTimeout(() => {
+                    if(!slot.classList.contains('correct')) {
+                        slot.className = 'target-slot';
+                    }
+                }, 1000);
+            }
+        }
+
+        // Жеңісті тексеру
+        function checkWin() {
+            const correctSlots = document.querySelectorAll('.target-slot.correct');
+            if (correctSlots.length === correctOrder.length) {
+                feedback.textContent = "🎉 Құттықтаймыз! Асқорыту лабиринтінен сәтті өттіңіз! 🌟";
+                feedback.style.color = '#0077b6';
+                resetBtn.style.display = 'block';
+            }
+        }
+
+        // --- МОБИЛЬДІ СЕНСОРЛЫ ЭКРАНДАРҒА АРНАЛҒАН ҚОЛДАУ (Touch) ---
+        let touchStartX, touchStartY;
+        
+        function handleTouchStart(e) {
+            draggedItem = this;
+            const touch = e.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            this.style.position = 'relative';
+            this.style.zIndex = '1000';
+        }
+
+        function handleTouchMove(e) {
+            if (!draggedItem) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            const currentX = touch.clientX - touchStartX;
+            const currentY = touch.clientY - touchStartY;
+            draggedItem.style.transform = `translate(${currentX}px, ${currentY}px)`;
+        }
+
+        function handleTouchEnd(e) {
+            if (!draggedItem) return;
+            
+            // Саусақты көтерген кездегі координат бойынша астындағы элементті табу
+            const touch = e.changedTouches[0];
+            draggedItem.style.display = 'none'; // Астындағы элементті көру үшін уақытша жасыру
+            const elementAtPoint = document.elementFromPoint(touch.clientX, touch.clientY);
+            draggedItem.style.display = 'block'; // Қайта қосу
+            
+            // Сүйреу стильдерін тазалау
+            draggedItem.style.transform = 'none';
+            draggedItem.style.position = 'static';
+            
+            const slot = elementAtPoint ? elementAtPoint.closest('.target-slot') : null;
+            
+            if (slot) {
+                checkDrop(draggedItem, slot);
+            }
+            draggedItem = null;
+        }
+
+        // Ойынды алғашқы рет іске қосу
+        initGame();
+    </script>
+</body>
+</html>
